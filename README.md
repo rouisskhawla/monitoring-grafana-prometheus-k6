@@ -88,7 +88,7 @@ Start Node Exporter:
 
 ```bash
 cd ~/node-exporter
-docker-compose up -d
+docker compose up -d
 curl http://192.168.1.14:9100/metrics
 ```
 
@@ -104,7 +104,7 @@ Start application:
 
 ```bash
 cd ~/app
-docker-compose up -d
+docker compose up -d
 curl http://192.168.1.14:8082
 ```
 
@@ -120,7 +120,7 @@ curl http://192.168.1.14:8082
 
 ```bash
 cd ~/monitoring-stack
-docker-compose up -d
+docker compose up -d
 ```
 
 ---
@@ -145,13 +145,17 @@ docker-compose up -d
 
 * File: [monitoring-stack/grafana/provisioning/dashboards/dashboard.yml](monitoring-stack/grafana/provisioning/dashboards/dashboard.yml)
 
-  > Dashboard provider configuration for Grafana.
+  > Dashboard provider configuration for Grafana. All JSON files in the folder are loaded automatically.
 
 * File: [monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json)
 
   > JSON file containing k6 dashboards for load testing metrics.
+  > You can use the [official k6 Grafana dashboard](https://grafana.com/grafana/dashboards/2587) or a custom export.
 
-> You can use the [official k6 Grafana dashboard](https://grafana.com/grafana/dashboards/2587) or a custom export.
+* File: [monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json)
+
+  > JSON file containing system metrics dashboards (CPU, RAM, Disk, and app metrics) from Prometheus.
+  > Export this from Grafana after creating a dashboard with Node Exporter and app metrics.
 
 ---
 

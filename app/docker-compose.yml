@@ -1,0 +1,7 @@
+version: "3.8"
+services:
+  app:
+    image: khawlarouiss/devops-ci-cd-pipeline:latest
+    ports:
+      - "8082:8082"
+    restart: unless-stopped

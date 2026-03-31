@@ -150,12 +150,10 @@ docker compose up -d
 * File: [monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json)
 
   > JSON file containing k6 dashboards for load testing metrics.
-  > You can use the [official k6 Grafana dashboard](https://grafana.com/grafana/dashboards/2587) or a custom export.
 
 * File: [monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json)
 
   > JSON file containing system metrics dashboards (CPU, RAM, Disk, and app metrics) from Prometheus.
-  > Export this from Grafana after creating a dashboard with Node Exporter and app metrics.
 
 ---
 

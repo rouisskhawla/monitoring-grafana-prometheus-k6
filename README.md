@@ -1,251 +1,181 @@
-# monitoring-grafana-prometheus-k6
+# Monitoring Stack: Grafana, Prometheus & k6
 
 ## Description
 
-A comprehensive monitoring and load testing solution built with Grafana, Prometheus, and k6. This project enables real-time metrics collection, performance analysis, and interactive visualization dashboards, helping to evaluate system health, detect issues, and measure application performance under load.
+This project provides a **complete monitoring and load testing environment** using Grafana, Prometheus, InfluxDB, and k6. It enables real-time metrics collection, performance analysis, and interactive dashboards.
 
-This project sets up a **complete observability and load testing environment** across two VMs:
+The setup is distributed across two virtual machines:
 
-- **VM1 (192.168.1.14)** → Runs the application and Node Exporter for system metrics.  
-- **VM2 (192.168.1.13)** → Runs Prometheus, Grafana, InfluxDB, and k6 for monitoring and load testing.  
-
-**Components:**
-
-| Component       | Purpose |
-|-----------------|---------|
-| Node Exporter   | Collects system metrics (CPU, RAM, Disk) on VM1 |
-| Application     | Runs the app under test on VM1 |
-| Prometheus      | Scrapes metrics from VM1 |
-| Grafana         | Visualizes metrics from Prometheus and InfluxDB |
-| InfluxDB        | Stores k6 load testing results |
-| k6              | Performs load testing on the application |
+* **VM1 (192.168.1.14)** → Hosts the application and Node Exporter
+* **VM2 (192.168.1.13)** → Hosts Prometheus, Grafana, InfluxDB, and k6
 
 ---
 
-## 1. Pre-requisites
+## Architecture Overview
 
-### 1.1 Docker & Docker Compose
+| Component     | Role                                     |
+| ------------- | ---------------------------------------- |
+| Node Exporter | Collects system metrics (CPU, RAM, Disk) |
+| Application   | Target system under test                 |
+| Prometheus    | Scrapes metrics                          |
+| Grafana       | Visualizes data                          |
+| InfluxDB      | Stores k6 results                        |
+| k6            | Performs load testing                    |
 
-Install Docker and Docker Compose on both VMs (Ubuntu/Debian):
+---
+
+## 1. Prerequisites
+
+### Docker & Docker Compose
 
 ```bash
 sudo apt update
 sudo apt install -y docker.io docker-compose
 sudo systemctl enable docker
 sudo systemctl start docker
-docker --version
-docker compose --version
-```
-
-### 1.2 Network Setup
-
-* Both VMs should use a **Bridged Network** for direct communication.
-* VM1 IP: `192.168.1.14`
-* VM2 IP: `192.168.1.13`
-
-Test connectivity from VM2:
-
-```bash
-ping 192.168.1.14
-```
-
-* Open required ports on VM1:
-
-  * Node Exporter → `9100`
-  * Application → `8082`
-
----
-
-## 2. Directory Creation
-
-### VM1
-
-```bash
-mkdir -p ~/node-exporter
-mkdir -p ~/app
-```
-
-### VM2
-
-```bash
-mkdir -p ~/monitoring-stack/prometheus
-mkdir -p ~/monitoring-stack/grafana/provisioning/datasources
-mkdir -p ~/monitoring-stack/k6/scripts
 ```
 
 ---
 
-## 3. VM1 Setup
+## 2. VM1 Setup
 
-### 3.1 Node Exporter
+### Node Exporter
 
-* File: [node-exporter/docker-compose.yml](node-exporter/docker-compose.yml)
-
-  > Docker Compose file for Node Exporter container exposing system metrics on port 9100.
-
-Start Node Exporter:
+* [Docker Compose File](node-exporter/docker-compose.yml)
 
 ```bash
 cd ~/node-exporter
 docker compose up -d
+```
+
+Check metrics:
+
+```bash
 curl http://192.168.1.14:9100/metrics
 ```
 
 #### Screenshot – Node Exporter Metrics
 
-```md
-[Node Exporter Metrics](docs/metrics.log)
-```
+![Node Exporter Metrics](docs/metrics.log)
+
 ---
 
-### 3.2 Application
+### Application
 
-* File: [app/docker-compose.yml](app/docker-compose.yml)
-
-  > Docker Compose file to run the application on port 8082.
-
-Start application:
+* [Docker Compose File](app/docker-compose.yml)
 
 ```bash
 cd ~/app
 docker compose up -d
-curl http://192.168.1.14:8082
 ```
 
 ---
 
-## 4. VM2 Setup
+## 3. VM2 Setup
 
-### 4.1 Monitoring Stack Docker Compose
+### Monitoring Stack
 
-* File: [monitoring-stack/docker-compose.yml](monitoring-stack/docker-compose.yml)
-
-  > Starts Prometheus, Grafana, InfluxDB, and k6 with persistent volumes.
+* [Docker Compose File](monitoring-stack/docker-compose.yml)
 
 ```bash
 cd ~/monitoring-stack
 docker compose up -d
 ```
 
-#### Screenshot – Monitor Stack Running
+#### Screenshot – Monitoring Stack Running
 
-```md
 ![Monitoring Stack](docs/monitoring-stack.png)
-```
 
 ---
 
-### 4.2 Prometheus Configuration
+### Prometheus
 
-* File: [monitoring-stack/prometheus/prometheus.yml](monitoring-stack/prometheus/prometheus.yml)
+* [Prometheus Config](monitoring-stack/prometheus/prometheus.yml)
 
-  > Configures Prometheus to scrape metrics from VM1 Node Exporter and application.
+#### Screenshot – Prometheus Targets UP
 
-#### Screenshot – Prometheus Targets
-
-```md
 ![Prometheus Targets](docs/prometheus-targets.png)
-```
 
 ---
 
-### 4.3 Grafana Data Sources
+### Grafana Data Sources
 
-* File: [monitoring-stack/grafana/provisioning/datasources/datasource.yml](monitoring-stack/grafana/provisioning/datasources/datasource.yml)
-
-  > Automatically provisions Prometheus and InfluxDB as data sources in Grafana on startup.
+* [Datasource Config](monitoring-stack/grafana/provisioning/datasources/datasource.yml)
 
 #### Screenshot – Grafana Data Sources
 
-```md
-![Grafana Data Sources](docs/grafana-datasources.png)
-```
+[Grafana Data Sources](docs/grafana-datasources.png)
 
 ---
 
-### 4.4 Grafana Dashboards
+### Grafana Dashboards
 
-Dashboards are imported manually via the Grafana UI.
+Access Grafana:
 
-1. Open `http://192.168.1.13:3000` → login `admin / admin`
-2. Go to **Dashboards → Import**
-3. Enter ID `1860` → click **Load** → select **Prometheus** as the datasource → **Import**
-4. Go to **Dashboards → Import** again
-5. Enter ID `24720` → click **Load** → select **InfluxDB** as the datasource → **Import**
-
-> Dashboards are persisted in the `grafana_data` volume and survive container restarts.
-
-#### Screenshot – System Dashboard
-
-```md
-![System Dashboard](docs/system-dashboard.png)
+```
+http://192.168.1.13:3000
 ```
 
-#### Screenshot – k6 Load Testing Dashboard
+Import dashboards:
 
-```md
-![k6 Dashboard](docs/k6-dashboard.png)
-```
+* ID **1860** (Node Exporter)
+* ID **24720** (k6)
+
+#### System Dashboard
+
+[System Dashboard](docs/system-dashboard.png)
+
+#### k6 Dashboard
+
+[k6 Dashboard](docs/k6-dashboard.png)
 
 ---
 
-### 4.5 k6 Load Test Script
+### k6 Load Test
 
-* File: [monitoring-stack/k6/scripts/test.js](monitoring-stack/k6/scripts/test.js)
+* [Test Scripts](monitoring-stack/k6/scripts/)
 
-  > k6 script that performs load testing against the application and stores results in InfluxDB.
-
-Run k6 test:
+Run:
 
 ```bash
-docker exec -it k6 k6 run --out influxdb=http://influxdb:8086/k6 /scripts/test.js
+docker exec -it k6 k6 run \
+--out influxdb=http://influxdb:8086/k6 \
+/scripts/test-v1.js
 ```
 
-#### Screenshot – k6 Test Execution
+#### Screenshot – k6 Run
 
-```md
 ![k6 Run](docs/k6-run.png)
-```
 
 ---
 
-### 4.6 k6 Versioned Load Tests
+## Versioned Load Tests
 
-We maintain **separate scripts for each load test version**. Each version is stored in [`monitoring-stack/k6/scripts/`](monitoring-stack/k6/scripts/) and corresponding results (dashboard screenshots and JSON summaries) are saved in versioned folders under [`monitoring-stack/k6/results/`](monitoring-stack/k6/results/).
+### Scripts
 
----
-
-#### Load Test Scripts Overview
-
-| Script                                                 | Virtual Users (VUs) | Duration   | Description                                                          |
-| ------------------------------------------------------ | ------------------- | ---------- | -------------------------------------------------------------------- |
-| [`test-v1.js`](monitoring-stack/k6/scripts/test-v1.js) | 20                  | 2 minutes  | Baseline test, simple load to verify system stability.               |
-| [`test-v2.js`](monitoring-stack/k6/scripts/test-v2.js) | 50                  | 5 minutes  | Increased load to test system performance under higher traffic.      |
-| [`test-v3.js`](monitoring-stack/k6/scripts/test-v3.js) | 100                 | 10 minutes | Stress test to evaluate system limits and behavior under heavy load. |
-
-> Each script uses the same request logic to the application but differs in **number of virtual users (VUs)** and **test duration**.
+| Script | Link                                                 | VUs | Duration |
+| ------ | ---------------------------------------------------- | --- | -------- |
+| v1     | [test-v1.js](monitoring-stack/k6/scripts/test-v1.js) | 20  | 2 min    |
+| v2     | [test-v2.js](monitoring-stack/k6/scripts/test-v2.js) | 50  | 5 min    |
+| v3     | [test-v3.js](monitoring-stack/k6/scripts/test-v3.js) | 100 | 10 min   |
 
 ---
 
-#### Results Folder Reference
+### Results
 
-* Each version has its own results folder:
+* [v1 result](monitoring-stack/k6/results/v1)
+* [v2 result](monitoring-stack/k6/results/v2)
+* [v3 result](monitoring-stack/k6/results/v3)
 
-```text
-[monitoring-stack/k6/results/v1/](monitoring-stack/k6/results/v1/)
-[monitoring-stack/k6/results/v2/](monitoring-stack/k6/results/v2/)
-[monitoring-stack/k6/results/v3/](monitoring-stack/k6/results/v3/)
-```
+#### Result for v3
 
-* **Results for v3**:
+* [k6 Dashboard v3](monitoring-stack/k6/results/v3/k6-dashboard-v3.png)
 
-  * [`k6-dashboard-v3.png`](monitoring-stack/k6/results/v3/k6-dashboard-v3.png) → screenshot of k6 metrics in Grafana
-  * [`system-dashboard-v3.png`](monitoring-stack/k6/results/v3/system-dashboard-v3.png) → screenshot of system metrics (CPU, RAM, Disk)
-  * [`test-v3-summary.json`](monitoring-stack/k6/results/v3/test-v3-summary.json) → k6 test summary exported during run
+* [System Dashboard v3](monitoring-stack/k6/results/v3/system-dashboard-v3.png)
 
 ---
 
-## 5. Accessing Services
+## Access URLs
 
 | Service       | URL                                                  |
 | ------------- | ---------------------------------------------------- |
@@ -256,20 +186,3 @@ We maintain **separate scripts for each load test version**. Each version is sto
 | Application   | [http://192.168.1.14:8082](http://192.168.1.14:8082) |
 
 ---
-
-## 6. Network / Firewall
-
-Ensure VM2 can reach VM1 on ports:
-
-* Node Exporter → `9100`
-* Application → `8082`
-
-Test connectivity:
-
-```bash
-curl http://192.168.1.14:9100/metrics
-curl http://192.168.1.14:8082
-```
-
----
-

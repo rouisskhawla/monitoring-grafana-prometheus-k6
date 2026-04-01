@@ -38,6 +38,7 @@ services:
     container_name: k6
     volumes:
       - ./k6/scripts:/scripts
+      - ./k6/results:/scripts/results
     entrypoint: ["tail", "-f", "/dev/null"]
 
 volumes:

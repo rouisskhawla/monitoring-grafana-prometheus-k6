@@ -91,6 +91,11 @@ docker compose up -d
 curl http://192.168.1.14:9100/metrics
 ```
 
+#### Screenshot – Node Exporter Metrics
+
+```md
+[Node Exporter Metrics](docs/metrics.log)
+```
 ---
 
 ### 3.2 Application
@@ -122,6 +127,12 @@ cd ~/monitoring-stack
 docker compose up -d
 ```
 
+#### Screenshot – Monitor Stack Running
+
+```md
+![Monitoring Stack](docs/monitoring-stack.png)
+```
+
 ---
 
 ### 4.2 Prometheus Configuration
@@ -130,6 +141,12 @@ docker compose up -d
 
   > Configures Prometheus to scrape metrics from VM1 Node Exporter and application.
 
+#### Screenshot – Prometheus Targets
+
+```md
+![Prometheus Targets](docs/prometheus-targets.png)
+```
+
 ---
 
 ### 4.3 Grafana Data Sources
@@ -137,6 +154,12 @@ docker compose up -d
 * File: [monitoring-stack/grafana/provisioning/datasources/datasource.yml](monitoring-stack/grafana/provisioning/datasources/datasource.yml)
 
   > Automatically provisions Prometheus and InfluxDB as data sources in Grafana on startup.
+
+#### Screenshot – Grafana Data Sources
+
+```md
+![Grafana Data Sources](docs/grafana-datasources.png)
+```
 
 ---
 
@@ -152,6 +175,18 @@ Dashboards are imported manually via the Grafana UI.
 
 > Dashboards are persisted in the `grafana_data` volume and survive container restarts.
 
+#### Screenshot – System Dashboard
+
+```md
+![System Dashboard](docs/system-dashboard.png)
+```
+
+#### Screenshot – k6 Load Testing Dashboard
+
+```md
+![k6 Dashboard](docs/k6-dashboard.png)
+```
+
 ---
 
 ### 4.5 k6 Load Test Script
@@ -165,6 +200,48 @@ Run k6 test:
 ```bash
 docker exec -it k6 k6 run --out influxdb=http://influxdb:8086/k6 /scripts/test.js
 ```
+
+#### Screenshot – k6 Test Execution
+
+```md
+![k6 Run](docs/k6-run.png)
+```
+
+---
+
+### 4.6 k6 Versioned Load Tests
+
+We maintain **separate scripts for each load test version**. Each version is stored in [`monitoring-stack/k6/scripts/`](monitoring-stack/k6/scripts/) and corresponding results (dashboard screenshots and JSON summaries) are saved in versioned folders under [`monitoring-stack/k6/results/`](monitoring-stack/k6/results/).
+
+---
+
+#### Load Test Scripts Overview
+
+| Script                                                 | Virtual Users (VUs) | Duration   | Description                                                          |
+| ------------------------------------------------------ | ------------------- | ---------- | -------------------------------------------------------------------- |
+| [`test-v1.js`](monitoring-stack/k6/scripts/test-v1.js) | 20                  | 2 minutes  | Baseline test, simple load to verify system stability.               |
+| [`test-v2.js`](monitoring-stack/k6/scripts/test-v2.js) | 50                  | 5 minutes  | Increased load to test system performance under higher traffic.      |
+| [`test-v3.js`](monitoring-stack/k6/scripts/test-v3.js) | 100                 | 10 minutes | Stress test to evaluate system limits and behavior under heavy load. |
+
+> Each script uses the same request logic to the application but differs in **number of virtual users (VUs)** and **test duration**.
+
+---
+
+#### Results Folder Reference
+
+* Each version has its own results folder:
+
+```text
+[monitoring-stack/k6/results/v1/](monitoring-stack/k6/results/v1/)
+[monitoring-stack/k6/results/v2/](monitoring-stack/k6/results/v2/)
+[monitoring-stack/k6/results/v3/](monitoring-stack/k6/results/v3/)
+```
+
+* **Results for v3**:
+
+  * [`k6-dashboard-v3.png`](monitoring-stack/k6/results/v3/k6-dashboard-v3.png) → screenshot of k6 metrics in Grafana
+  * [`system-dashboard-v3.png`](monitoring-stack/k6/results/v3/system-dashboard-v3.png) → screenshot of system metrics (CPU, RAM, Disk)
+  * [`test-v3-summary.json`](monitoring-stack/k6/results/v3/test-v3-summary.json) → k6 test summary exported during run
 
 ---
 
@@ -195,3 +272,4 @@ curl http://192.168.1.14:8082
 ```
 
 ---
+

@@ -35,7 +35,7 @@ sudo systemctl enable docker
 sudo systemctl start docker
 docker --version
 docker compose --version
-````
+```
 
 ### 1.2 Network Setup
 
@@ -70,7 +70,6 @@ mkdir -p ~/app
 ```bash
 mkdir -p ~/monitoring-stack/prometheus
 mkdir -p ~/monitoring-stack/grafana/provisioning/datasources
-mkdir -p ~/monitoring-stack/grafana/provisioning/dashboards
 mkdir -p ~/monitoring-stack/k6/scripts
 ```
 
@@ -137,23 +136,21 @@ docker compose up -d
 
 * File: [monitoring-stack/grafana/provisioning/datasources/datasource.yml](monitoring-stack/grafana/provisioning/datasources/datasource.yml)
 
-  > Defines Prometheus and InfluxDB as data sources in Grafana.
+  > Automatically provisions Prometheus and InfluxDB as data sources in Grafana on startup.
 
 ---
 
 ### 4.4 Grafana Dashboards
 
-* File: [monitoring-stack/grafana/provisioning/dashboards/dashboard.yml](monitoring-stack/grafana/provisioning/dashboards/dashboard.yml)
+Dashboards are imported manually via the Grafana UI.
 
-  > Dashboard provider configuration for Grafana. All JSON files in the folder are loaded automatically.
+1. Open `http://192.168.1.13:3000` → login `admin / admin`
+2. Go to **Dashboards → Import**
+3. Enter ID `1860` → click **Load** → select **Prometheus** as the datasource → **Import**
+4. Go to **Dashboards → Import** again
+5. Enter ID `24720` → click **Load** → select **InfluxDB** as the datasource → **Import**
 
-* File: [monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/k6-dashboard.json)
-
-  > JSON file containing k6 dashboards for load testing metrics.
-
-* File: [monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json](monitoring-stack/grafana/provisioning/dashboards/system-dashboard.json)
-
-  > JSON file containing system metrics dashboards (CPU, RAM, Disk, and app metrics) from Prometheus.
+> Dashboards are persisted in the `grafana_data` volume and survive container restarts.
 
 ---
 

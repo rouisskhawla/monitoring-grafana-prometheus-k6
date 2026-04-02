@@ -54,9 +54,9 @@ Check metrics:
 curl http://192.168.1.14:9100/metrics
 ```
 
-#### Screenshot – Node Exporter Metrics
+#### Log file – Node Exporter Metrics
 
-![Node Exporter Metrics](docs/metrics.log)
+[Node Exporter Metrics](docs/metrics.log)
 
 ---
 
@@ -172,7 +172,8 @@ docker exec -it k6 k6 run \
 * [k6 Dashboard v3](monitoring-stack/k6/results/v3/k6-dashboard-v3.png)
 
 * [System Dashboard v3](monitoring-stack/k6/results/v3/system-dashboard-v3.png)
-
+  
+* [Json Summary v3](monitoring-stack/k6/results/v3/test-v3-summary.json)
 ---
 
 ## Access URLs

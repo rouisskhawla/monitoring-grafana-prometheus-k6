@@ -153,11 +153,13 @@ docker exec -it k6 k6 run \
 
 ### Scripts
 
-| Script | Link                                                 | VUs | Duration |
-| ------ | ---------------------------------------------------- | --- | -------- |
-| v1     | [test-v1.js](monitoring-stack/k6/scripts/test-v1.js) | 20  | 2 min    |
-| v2     | [test-v2.js](monitoring-stack/k6/scripts/test-v2.js) | 50  | 5 min    |
-| v3     | [test-v3.js](monitoring-stack/k6/scripts/test-v3.js) | 100 | 10 min   |
+| Script       | Link                                                          | Type                 | VUs / Rate       | Duration |
+|--------------|---------------------------------------------------------------|----------------------|------------------|----------|
+| v1           | [test-v1.js](monitoring-stack/k6/scripts/test-v1.js)          | Baseline             | 20 VUs           | 2 min    |
+| v2           | [test-v2.js](monitoring-stack/k6/scripts/test-v2.js)          | Load                 | 50 VUs           | 5 min    |
+| v3           | [test-v3.js](monitoring-stack/k6/scripts/test-v3.js)          | Stress               | 100 VUs          | 10 min   |
+| v4           | [test-v4.js](monitoring-stack/k6/scripts/test-v4.js)          | Ramp-Up              | 20 → 100 VUs     | 10 min   |
+| v5           | [test-v5.js](monitoring-stack/k6/scripts/test-v5.js)          | Spike                | 20 → 200 → 20    | ~2 min   |
 
 ---
 
@@ -166,6 +168,8 @@ docker exec -it k6 k6 run \
 * [v1 result](monitoring-stack/k6/results/v1)
 * [v2 result](monitoring-stack/k6/results/v2)
 * [v3 result](monitoring-stack/k6/results/v3)
+* [v4 result](monitoring-stack/k6/results/v4)
+* [v5 result](monitoring-stack/k6/results/v5)
 
 #### Result for v3
 
